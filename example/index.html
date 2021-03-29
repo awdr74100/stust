@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+  </head>
+  <body>
+    <input type="file" class="files" multiple />
+    <button class="uploadBtn">上傳</button>
+    <button class="callBtn">辨識成功</button>
+    <button class="strBtn">驗證解碼字串</button>
+    <script>
+      const uploadBtn = document.querySelector('.uploadBtn');
+      const callBtn = document.querySelector('.callBtn');
+      const files = document.querySelector('.files');
+      const strBtn = document.querySelector('.strBtn');
+      uploadBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        [...files.files].forEach((file) => {
+          formData.append('sounds', file);
+        });
+        try {
+          const data = await fetch('http://localhost:3000/api/sounds', {
+            method: 'POST',
+            body: formData,
+          }).then((res) => res.json());
+          console.log(data);
+        } catch (error) {
+          console.log(error);
+        }
+      });
+      callBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const hash = 'meet';
+        try {
+          const data = await fetch(
+            'http://localhost:3000/api/doors/call/meet',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                hash,
+              }),
+            },
+          ).then((res) => res.json());
+          console.log(data);
+        } catch (error) {
+          console.log(error);
+        }
+      });
+      strBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const hash = 'meet';
+        try {
+          const data = await fetch('http://localhost:3000/api/doors/open', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              hash,
+            }),
+          }).then((res) => res.json());
+          console.log(data);
+        } catch (error) {
+          console.log(error);
+        }
+      });
+    </script>
+    <script>
+      const socket = io('http://localhost:3000');
+      socket.on('connect', () => {
+        console.log('connected to the server');
+      });
+      socket.on('close_webview', (message) => {
+        console.log(message);
+      });
+      socket.on('play_sound', (message) => {
+        console.log(message);
+      });
+      socket.on('open_door', (message) => {
+        console.log(message);
+      });
+    </script>
+  </body>
+</html>
